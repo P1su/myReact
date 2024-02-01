@@ -5,7 +5,6 @@ import { useState } from 'react';//리액트 제공 기본 함수
 
 //사용자 정의 태그를 만들기 위해서는 함수를 생성..반드시 대문자로 시작
 function Header(props){//<컴포넌트> == 흔히 말하는 사용자 정의 태그!
-  console.log('props',props,props.title)
 
   return <header> 
     <h1><a href='/' onClick={(event)=>{
@@ -29,6 +28,7 @@ function Nav(props){
     </li>)
 
   }
+
   return <nav>
     <ol>
       {lis}
@@ -43,6 +43,24 @@ function Article(props){
   </article>
 }
 
+function Create(props){
+  return <article>
+    <h2>Create</h2>
+
+    <form onSubmit={event=>{
+      event.preventDefault();
+      const title = event.target.title.value;
+      const body = event.target.body.value;
+      props.onCreate(title, body);
+    }}>
+      <p><input type = "text" name = "title" placeholder='title'/></p>
+      <p><textarea name = "body" placeholder='body'></textarea></p>
+      <p><input type = "submit" value="Create"></input></p>
+    </form>
+
+  </article>
+}
+
 function App() {//다음 함수가 화면을 구성하는 것임 
  // const _mode = useState('WELCOME'); // 지역변수인 mode를 usestate를 통해서 상태로 만듦
  // const mode = _mode[0];
@@ -50,12 +68,12 @@ function App() {//다음 함수가 화면을 구성하는 것임
 
   const [mode, setMode] = useState('WELCOME');//축약형
   const [id, setId] = useState(null);
-
-  const topics = [
+  const [nxtId, setNxtId] = useState(4);
+  const [topics, setTopics] = useState([
     {id:1, title:'html', body:'html is ...'},
     {id:2, title:'css', body:'css is ...'},
     {id:3, title:'javascript', body:'javascript is ...'},
-  ]
+  ])
 
   let content = null;
 
@@ -72,6 +90,17 @@ function App() {//다음 함수가 화면을 구성하는 것임
     }
 
     content = <Article title = {title} body = {body}></Article>
+  } else if(mode  === 'CREATE'){
+      content = <Create onCreate = {(_title, _body)=>{
+        const newTopic = {id: nxtId, title: _title, body: _body}
+        const newTopics = [...topics] //topics 복제본
+        newTopics.push(newTopic);
+        
+        setTopics(newTopics);
+        setMode("READ");
+        setId(nxtId);
+        setNxtId(nxtId+1);
+      }} ></Create>
   }
 
   return (
@@ -86,6 +115,11 @@ function App() {//다음 함수가 화면을 구성하는 것임
       }} ></Nav>
 
       {content}
+
+      <a href='/create' onClick = {event=>{
+        event.preventDefault();
+        setMode('CREATE');
+      }}>Create</a>
     </div>
 
   );//nav는 이동하는 영역 article은 본문 표시 영역
